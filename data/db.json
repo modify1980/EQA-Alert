@@ -1,0 +1,108 @@
+{
+  "settings": {
+    "lineNotifyToken": "",
+    "lineNotifyActive": true,
+    "enableSoundAlerts": true,
+    "lineChannelAccessToken": "Ex3kjgpoRFHEobWa87BlAcL2ae3Yt3FC2F7a7rFc37HNRzwuXfVDT1p1J8usQH2kyQozprRYiH4TjcWGAvUtlOMraHsZSxwLJVfyOiih5t2F4Zkg6/ymWLDyb5FDbfnX33tZ6qkCOjL+L8CSPEdsmAdB04t89/1O/w1cDnyilFU=",
+    "lineSendType": "broadcast",
+    "lineTargetId": ""
+  },
+  "records": [
+    {
+      "id": "rec_2fwainjps",
+      "createdAt": "2026-07-01T10:56:22.284Z",
+      "alerts": [
+        {
+          "id": "al_6xf0lnx",
+          "topicType": "deadline_warning",
+          "remindAt": "2026-07-10T09:00",
+          "notifyLine": true,
+          "notifyWeb": true,
+          "status": "pending"
+        },
+        {
+          "id": "al_60v7tqx",
+          "topicType": "deadline_warning",
+          "remindAt": "2026-07-12T09:00",
+          "notifyLine": true,
+          "notifyWeb": true,
+          "status": "pending"
+        },
+        {
+          "id": "al_d2rutla",
+          "topicType": "deadline_warning",
+          "remindAt": "2026-07-13T17:54",
+          "notifyLine": true,
+          "notifyWeb": true,
+          "status": "pending"
+        },
+        {
+          "id": "al_7o4ftcs",
+          "topicType": "sample_received",
+          "remindAt": "2026-07-01T18:00",
+          "notifyLine": true,
+          "notifyWeb": true,
+          "status": "sent",
+          "sentAt": "2026-07-01T18:00:05.415Z"
+        },
+        {
+          "id": "al_dprbnbk",
+          "topicType": "sample_received",
+          "remindAt": "2026-07-01T18:00",
+          "notifyLine": true,
+          "notifyWeb": true,
+          "status": "sent",
+          "sentAt": "2026-07-01T18:00:05.415Z"
+        }
+      ],
+      "receiveDate": "2026-07-01",
+      "fromDept": "กรมวิทยาศาสตร์การแพทย์",
+      "branch": "ธนาคารเลือด",
+      "deadlineDate": "2026-07-13",
+      "round": "2/69",
+      "responsiblePerson": "ปํณณ์ชรัสมิ?",
+      "notes": "",
+      "status": "pending"
+    }
+  ],
+  "logs": [
+    {
+      "id": "log_ukssngtz4",
+      "recordId": "rec_2fwainjps",
+      "recordTitle": "ครั้งที่ 2/69 (ธนาคารเลือด)",
+      "message": "📢 [EQA Alert Memo]\n📌 เรื่อง: 📦 แจ้งเตือนได้รับตัวอย่าง\n🧬 งาน: ธนาคารเลือด\n🏫 แหล่งที่มา: กรมวิทยาศาสตร์การแพทย์\n🔢 ครั้งที่/รอบ: 2/69\n📅 กำหนดส่ง: 13 ก.ค. 2569\n👤 ผู้รับผิดชอบ: ปํณณ์ชรัสมิ?\n📝 โน้ต: -\n⏱️ สถานะปัจจุบัน: 🔴 รอดำเนินการ",
+      "type": "sample_received",
+      "timestamp": "2026-07-01T18:00:05.415Z",
+      "channel": "both",
+      "status": "success"
+    },
+    {
+      "id": "log_7j3qjqzli",
+      "recordId": "rec_2fwainjps",
+      "recordTitle": "ครั้งที่ 2/69 (ธนาคารเลือด)",
+      "message": "📢 [EQA Alert Memo]\n📌 เรื่อง: 📦 แจ้งเตือนได้รับตัวอย่าง\n🧬 งาน: ธนาคารเลือด\n🏫 แหล่งที่มา: กรมวิทยาศาสตร์การแพทย์\n🔢 ครั้งที่/รอบ: 2/69\n📅 กำหนดส่ง: 13 ก.ค. 2569\n👤 ผู้รับผิดชอบ: ปํณณ์ชรัสมิ?\n📝 โน้ต: -\n⏱️ สถานะปัจจุบัน: 🔴 รอดำเนินการ",
+      "type": "sample_received",
+      "timestamp": "2026-07-01T18:00:05.415Z",
+      "channel": "both",
+      "status": "success"
+    },
+    {
+      "id": "log_gvr7x3bf1",
+      "recordTitle": "ทดสอบ LINE OA",
+      "message": "🔔 ทดสอบระบบการแจ้งเตือนจาก EQA Alert Memo! ระบบส่งการแจ้งเตือน LINE Official Account ของคุณพร้อมใช้งานแล้ว",
+      "type": "custom",
+      "timestamp": "2026-07-01T11:42:25.535Z",
+      "channel": "line",
+      "status": "success"
+    },
+    {
+      "id": "log_el1vt6h18",
+      "recordTitle": "ทดสอบ LINE OA",
+      "message": "🔔 ทดสอบระบบการแจ้งเตือนจาก EQA Alert Memo! ระบบส่งการแจ้งเตือน LINE Official Account ของคุณพร้อมใช้งานแล้ว",
+      "type": "custom",
+      "timestamp": "2026-07-01T11:13:46.965Z",
+      "channel": "line",
+      "status": "success"
+    }
+  ]
+}

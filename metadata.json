@@ -1,0 +1,10 @@
+{
+  "name": "EQA Alert Memo",
+  "description": "ระบบบันทึกและติดตามการรับ-ส่ง EQA พร้อมระบบแจ้งเตือนแบบกำหนดเวลาผ่าน LINE Notify และการสแกนเอกสารอัตโนมัติด้วย AI",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
