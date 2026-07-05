@@ -18,13 +18,21 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 // Initialize Supabase client if credentials are provided
 let supabase: any = null;
 let supabaseTableMissing = false;
+let supabaseLastError: any = null;
 
 if (process.env.SUPABASE_URL && process.env.SUPABASE_KEY) {
   try {
-    supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-    console.log("Supabase client initialized successfully with URL:", process.env.SUPABASE_URL);
-  } catch (err) {
+    const cleanUrl = process.env.SUPABASE_URL.trim().replace(/\/$/, "");
+    const cleanKey = process.env.SUPABASE_KEY.trim();
+    supabase = createClient(cleanUrl, cleanKey);
+    console.log("Supabase client initialized successfully with URL:", cleanUrl);
+  } catch (err: any) {
     console.error("Failed to initialize Supabase client:", err);
+    supabaseLastError = {
+      code: "INIT_FAILED",
+      message: err.message || "Failed to initialize Supabase client",
+      details: String(err)
+    };
   }
 }
 
@@ -115,13 +123,30 @@ async function readDb() {
             error.message.includes("Could not find the table")
           ));
 
+        supabaseLastError = {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint || (isTableMissing ? "ตาราง eqa_store ยังไม่ได้ถูกสร้างขึ้นใน Supabase SQL Editor" : undefined)
+        };
+
         if (isTableMissing) {
           supabaseTableMissing = true;
           console.warn("Table 'eqa_store' does not exist in Supabase. Falling back to local storage (data/db.json) for now. Run the SQL schema script in your Supabase SQL Editor to enable persistent cloud storage.");
         } else {
-          console.error("Supabase read error (falling back to local):", error);
+          console.error("Supabase read error (falling back to local):", {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
+          if (error.code === "PGRST301" || error.message?.includes("JWT") || error.message?.includes("key")) {
+            console.error("👉 SUGGESTION: Your SUPABASE_KEY (anon key) might be invalid or there is a copy-paste typo. Please check that you copied the 'anon/public' key correctly without spaces and pressed 'Apply changes'!");
+            supabaseLastError.hint = "สิทธิ์ในการเข้าถึงถูกปฏิเสธ (Invalid API Key) ตรวจสอบให้แน่ใจว่าคัดลอก 'anon / public' key ของโปรเจกต์ใหม่มาอย่างถูกต้อง ไม่มีเว้นวรรค และไม่มีอักขระพิเศษส่วนเกิน";
+          }
         }
       } else if (data && data.data) {
+        supabaseLastError = null; // Clear on success
         return normalizeDb(data.data);
       } else {
         // Row doesn't exist yet, seed it with local data if exists, otherwise defaultDb
@@ -153,17 +178,35 @@ async function readDb() {
               insertError.message.includes("does not exist") || 
               insertError.message.includes("Could not find the table")
             ));
+          
+          supabaseLastError = {
+            code: insertError.code,
+            message: insertError.message,
+            details: insertError.details,
+            hint: insertError.hint || (isTableMissing ? "ตาราง eqa_store ยังไม่ได้ถูกสร้างขึ้นใน Supabase SQL Editor" : undefined)
+          };
+
           if (isTableMissing) {
             supabaseTableMissing = true;
             console.warn("Table 'eqa_store' does not exist in Supabase during seed. Falling back to local storage.");
           } else {
             console.error("Failed to seed default data in Supabase:", insertError);
+            if (insertError.code === "PGRST301" || insertError.message?.includes("JWT") || insertError.message?.includes("key")) {
+              supabaseLastError.hint = "สิทธิ์ในการเข้าถึงถูกปฏิเสธ (Invalid API Key) ตรวจสอบให้แน่ใจว่าคัดลอก 'anon / public' key ของโปรเจกต์ใหม่มาอย่างถูกต้อง ไม่มีเว้นวรรค และไม่มีอักขระพิเศษส่วนเกิน";
+            }
           }
+        } else {
+          supabaseLastError = null; // Clear on success
         }
         return seedData;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Unexpected error reading from Supabase (falling back to local):", err);
+      supabaseLastError = {
+        code: "UNEXPECTED_READ_ERROR",
+        message: err.message || "Unexpected Supabase read error",
+        details: String(err)
+      };
     }
   }
 
@@ -190,6 +233,7 @@ async function writeDb(data: any) {
         .from("eqa_store")
         .upsert({ id: "main", data: data, updated_at: new Date().toISOString() });
       if (!error) {
+        supabaseLastError = null; // Clear on success
         return true;
       }
       
@@ -201,14 +245,30 @@ async function writeDb(data: any) {
           error.message.includes("does not exist") || 
           error.message.includes("Could not find the table")
         ));
+
+      supabaseLastError = {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint || (isTableMissing ? "ตาราง eqa_store ยังไม่ได้ถูกสร้างขึ้นใน Supabase SQL Editor" : undefined)
+      };
+
       if (isTableMissing) {
         supabaseTableMissing = true;
         console.warn("Table 'eqa_store' does not exist in Supabase during write. Falling back to local storage.");
       } else {
         console.error("Supabase write error (falling back to local):", error);
+        if (error.code === "PGRST301" || error.message?.includes("JWT") || error.message?.includes("key")) {
+          supabaseLastError.hint = "สิทธิ์ในการเข้าถึงถูกปฏิเสธ (Invalid API Key) ตรวจสอบให้แน่ใจว่าคัดลอก 'anon / public' key ของโปรเจกต์ใหม่มาอย่างถูกต้อง ไม่มีเว้นวรรค และไม่มีอักขระพิเศษส่วนเกิน";
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Unexpected error writing to Supabase (falling back to local):", err);
+      supabaseLastError = {
+        code: "UNEXPECTED_WRITE_ERROR",
+        message: err.message || "Unexpected Supabase write error",
+        details: String(err)
+      };
     }
   }
 
@@ -439,10 +499,11 @@ const getGeminiClient = () => {
 // Get Database Status
 app.get("/api/db-status", (req, res) => {
   res.json({
-    supabaseEnabled: !!supabase && !supabaseTableMissing,
+    supabaseEnabled: !!supabase && !supabaseTableMissing && !supabaseLastError,
     supabaseUrl: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.replace(/https:\/\/(.*)\.supabase\.co.*/, "$1.supabase.co") : null,
     supabaseTableMissing: supabaseTableMissing,
-    fallbackLocal: !supabase || supabaseTableMissing,
+    fallbackLocal: !supabase || supabaseTableMissing || !!supabaseLastError,
+    supabaseError: supabaseLastError,
   });
 });
 

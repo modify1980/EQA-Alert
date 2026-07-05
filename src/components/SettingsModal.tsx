@@ -31,6 +31,12 @@ export default function SettingsModal({
     supabaseUrl: string | null;
     supabaseTableMissing?: boolean;
     fallbackLocal: boolean;
+    supabaseError?: {
+      code?: string;
+      message?: string;
+      details?: string;
+      hint?: string;
+    } | null;
   } | null>(null);
 
   useEffect(() => {
@@ -160,18 +166,22 @@ export default function SettingsModal({
             <div className={`p-4 rounded-xl border flex flex-col gap-3 transition-colors ${
               dbStatus.supabaseEnabled
                 ? (theme === "dark" ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-300" : "bg-emerald-50 border-emerald-150 text-emerald-900")
-                : dbStatus.supabaseTableMissing
-                  ? (theme === "dark" ? "bg-amber-500/5 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-150 text-amber-900")
-                  : (theme === "dark" ? "bg-zinc-800/20 border-zinc-700/30 text-zinc-300" : "bg-zinc-50 border-zinc-200 text-zinc-850")
+                : dbStatus.supabaseError
+                  ? (theme === "dark" ? "bg-rose-500/5 border-rose-500/20 text-rose-300" : "bg-rose-50 border-rose-150 text-rose-900")
+                  : dbStatus.supabaseTableMissing
+                    ? (theme === "dark" ? "bg-amber-500/5 border-amber-500/20 text-amber-300" : "bg-amber-50 border-amber-150 text-amber-900")
+                    : (theme === "dark" ? "bg-zinc-800/20 border-zinc-700/30 text-zinc-300" : "bg-zinc-50 border-zinc-200 text-zinc-850")
             }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Database className={`h-4.5 w-4.5 ${
                     dbStatus.supabaseEnabled 
                       ? "text-emerald-500" 
-                      : dbStatus.supabaseTableMissing 
-                        ? "text-amber-500 animate-pulse" 
-                        : "text-zinc-500"
+                      : dbStatus.supabaseError
+                        ? "text-rose-500 animate-pulse"
+                        : dbStatus.supabaseTableMissing 
+                          ? "text-amber-500 animate-pulse" 
+                          : "text-zinc-500"
                   }`} />
                   <span className="text-xs font-bold">
                     ระบบจัดเก็บข้อมูล (Database Storage)
@@ -180,15 +190,19 @@ export default function SettingsModal({
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                   dbStatus.supabaseEnabled
                     ? "bg-emerald-500/10 text-emerald-400"
-                    : dbStatus.supabaseTableMissing
-                      ? "bg-amber-500/10 text-amber-500"
-                      : "bg-zinc-500/10 text-zinc-500"
+                    : dbStatus.supabaseError
+                      ? "bg-rose-500/10 text-rose-500"
+                      : dbStatus.supabaseTableMissing
+                        ? "bg-amber-500/10 text-amber-500"
+                        : "bg-zinc-500/10 text-zinc-500"
                 }`}>
                   {dbStatus.supabaseEnabled 
                     ? "Supabase Active" 
-                    : dbStatus.supabaseTableMissing 
-                      ? "Migration Required" 
-                      : "Local Database"}
+                    : dbStatus.supabaseError
+                      ? "Supabase Error"
+                      : dbStatus.supabaseTableMissing 
+                        ? "Migration Required" 
+                        : "Local Database"}
                 </span>
               </div>
 
@@ -197,6 +211,26 @@ export default function SettingsModal({
                   <>
                     <p>✅ <strong>เชื่อมต่อ Supabase สำเร็จ:</strong> ระบบจัดเก็บข้อมูลถาวรบนระบบคลาวด์เปิดใช้งานแล้ว ข้อมูลของคุณจะปลอดภัยและซิงค์แบบ Realtime</p>
                     <p className="font-mono text-[10px] opacity-75">Host Project: {dbStatus.supabaseUrl}</p>
+                  </>
+                ) : dbStatus.supabaseError ? (
+                  <>
+                    <p className="text-rose-500 font-bold">❌ ตรวจพบข้อผิดพลาดในการเชื่อมต่อ Supabase:</p>
+                    <div className="p-2.5 rounded-lg bg-black/40 border border-rose-500/15 font-mono text-[10px] text-rose-400 space-y-1">
+                      <div><strong>Message:</strong> {dbStatus.supabaseError.message || "Unknown error"}</div>
+                      {dbStatus.supabaseError.code && <div><strong>Code:</strong> {dbStatus.supabaseError.code}</div>}
+                      {dbStatus.supabaseError.details && <div><strong>Details:</strong> {dbStatus.supabaseError.details}</div>}
+                      {dbStatus.supabaseError.hint && <div><strong>Hint:</strong> {dbStatus.supabaseError.hint}</div>}
+                    </div>
+                    
+                    <div className="mt-2.5 space-y-1 text-zinc-500 dark:text-zinc-400 text-[10px]">
+                      <p className="font-bold text-amber-500 text-[11px]">💡 คำแนะนำความปลอดภัยและการแก้ไข:</p>
+                      <div className="pl-3 space-y-1 list-decimal">
+                        <div>1. <strong>ความถูกต้องของ SUPABASE_KEY (anon/public key):</strong> ตรวจเช็คว่าคีย์ที่วางไม่มีอักขระส่วนเกิน เช่น เปลือกคำพูด แบ็กทิก (`) หรือสัญลักษณ์พิเศษ เช่น เส้นแบ่งแนวตั้ง <code>|</code> จากเคอร์เซอร์คัดลอก</div>
+                        <div>2. <strong>ความถูกต้องของ SUPABASE_URL:</strong> ตรวจสอบว่าต้องเริ่มต้นด้วย <code>https://</code> และจบด้วย <code>.supabase.co</code> (ห้ามใส่สแลชปิดท้าย <code>/</code>)</div>
+                        <div>3. <strong>การกดบันทึก:</strong> หลังจากป้อนค่าในระบบ Secrets ของ Google AI Studio แล้ว ต้องกดปุ่ม <strong>"Apply changes"</strong> ด้วย</div>
+                        <div>4. <strong>ระบบสำรอง (Local Fallback):</strong> ในระหว่างแก้ไขระบบ แอปจะจัดเก็บข้อมูลลงใน Local Storage ให้โดยอัตโนมัติ เพื่อไม่ให้ข้อมูลของคุณสูญหาย</div>
+                      </div>
+                    </div>
                   </>
                 ) : dbStatus.supabaseTableMissing ? (
                   <>
