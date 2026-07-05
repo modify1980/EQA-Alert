@@ -740,7 +740,12 @@ app.post("/api/alerts/trigger-check", async (req, res) => {
 
 // Setup Vite Dev server middleware or serve production assets
 async function setupServer() {
-  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  if (process.env.VERCEL) {
+    console.log("Running in Vercel Serverless mode - listening and static serving skipped.");
+    return;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -755,11 +760,6 @@ async function setupServer() {
       res.sendFile(path.join(distPath, "index.html"));
     });
     console.log("Serving static production files from:", distPath);
-  }
-
-  if (process.env.VERCEL) {
-    console.log("Running in Vercel Serverless mode - listening skipped.");
-    return;
   }
 
   app.listen(PORT, "0.0.0.0", () => {
